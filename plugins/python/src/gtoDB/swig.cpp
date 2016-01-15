@@ -37,6 +37,12 @@
 #define SWIGPYTHON
 #define SWIG_PYTHON_DIRECTOR_NO_VTABLE
 
+#ifdef __GNUC__
+  #if __GNUC__ >= 4 && __GNUC_MINOR__ >= 6
+    #include <cstddef>
+  #endif
+#endif
+
 #ifdef __cplusplus
 template<class T> class SwigValueWrapper {
     T *tt;
