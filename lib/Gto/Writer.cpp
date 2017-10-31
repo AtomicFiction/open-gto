@@ -657,7 +657,7 @@ Writer::writeText(const std::string& s)
 #ifdef GTO_SUPPORT_ZIP
     else if (m_gzfile)
     {
-        gzwrite(m_gzfile, (void*)s.c_str(), s.size());
+        gzwrite((gzFile)m_gzfile, (void*)s.c_str(), s.size());
     }
 #endif
 }
@@ -687,7 +687,7 @@ Writer::write(const void* p, size_t s)
 #ifdef GTO_SUPPORT_ZIP
     else if (m_gzfile)
     {
-        gzwrite(m_gzfile, (void*)p, s);
+        gzwrite((gzFile)m_gzfile, (void*)p, s);
     }
 #endif
 }
@@ -703,7 +703,7 @@ Writer::write(const std::string& s)
 #ifdef GTO_SUPPORT_ZIP
     else if (m_gzfile)
     {
-        gzwrite(m_gzfile, (void*)s.c_str(), s.size() + 1);
+        gzwrite((gzFile)m_gzfile, (void*)s.c_str(), s.size() + 1);
     }
 #endif
 }
@@ -900,7 +900,7 @@ Writer::propertyDataRaw(const void* data,
 #ifdef GTO_SUPPORT_ZIP
             if( (m_type == CompressedGTO) && m_writeIndexTable )
             {
-                gzflush(m_gzfile, Z_FULL_FLUSH);
+                gzflush((gzFile)m_gzfile, Z_FULL_FLUSH);
                 #ifdef WIN32
                 m_dataOffsets.push_back( _lseek( m_gzRawFd, 0, SEEK_CUR ));
                 #else
@@ -941,7 +941,7 @@ Writer::prepIndexTable()
     unsigned int placeholders[2] = {0, 0};
     fwrite(placeholders, sizeof(unsigned int), 2, s->gto_z_file);
 
-    gzflush(m_gzfile, Z_FULL_FLUSH);
+    gzflush((gzFile)m_gzfile, Z_FULL_FLUSH);
     s->gto_start = ftell(s->gto_z_file);
 }
 
@@ -957,7 +957,7 @@ Writer::writeIndexTable()
     //
     // Lay down a gzip marker and remember where it is
     //
-    gzflush(m_gzfile, Z_FULL_FLUSH);
+    gzflush((gzFile)m_gzfile, Z_FULL_FLUSH);
     #ifdef WIN32
     unsigned int indexTableOffset = _lseek(m_gzRawFd, 0, SEEK_CUR);
     #else
@@ -979,7 +979,7 @@ Writer::writeIndexTable()
     //
     // Write the index table into the gzip stream
     //
-    int w = gzwrite(m_gzfile, &m_dataOffsets.front(),
+    int w = gzwrite((gzFile)m_gzfile, &m_dataOffsets.front(),
                     m_dataOffsets.size() * sizeof(unsigned int));
 
     //
@@ -987,7 +987,7 @@ Writer::writeIndexTable()
     // to the header in the next step.  I believe this writes
     // the CRC32 and ISIZE fields at the end of the file.
     //
-    gzclose(m_gzfile);
+    gzclose((gzFile)m_gzfile);
 
     //
     // Write the raw offset to the index table into the

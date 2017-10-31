@@ -239,7 +239,7 @@ Reader::close()
 
         if (m_gzfile) 
         {
-            gzclose(m_gzfile);
+            gzclose((gzFile)m_gzfile);
             m_gzfile = 0;
         }
 #endif
@@ -812,12 +812,12 @@ Reader::read(char *buffer, size_t size)
         size_t remaining = size;
         while (remaining != 0)
         {
-            int retval = gzread(m_gzfile, buffer_pos, remaining);
+            int retval = gzread((gzFile)m_gzfile, buffer_pos, remaining);
             if (retval <= 0)
             {
                 int zError = 0;
                 std::cerr << "ERROR: Gto::Reader: Failed to read gto file: ";
-                std::cerr << gzerror( m_gzfile, &zError );
+                std::cerr << gzerror( (gzFile)m_gzfile, &zError );
                 std::cerr << std::endl;
                 memset( buffer, 0, size );
                 fail( "gzread fail" );
@@ -852,7 +852,7 @@ Reader::get(char &c)
 #ifdef GTO_SUPPORT_ZIP
     else if (m_gzfile)
     {
-        m_gzrval = gzgetc(m_gzfile);
+        m_gzrval = gzgetc((gzFile)m_gzfile);
         c = char(m_gzrval);
     }
 #endif
@@ -899,7 +899,7 @@ void Reader::seekForward(size_t bytes)
 #ifdef GTO_SUPPORT_ZIP
     else
     {
-        gzseek(m_gzfile, bytes, SEEK_CUR);
+        gzseek((gzFile)m_gzfile, bytes, SEEK_CUR);
     }
 #endif
 }
@@ -928,11 +928,11 @@ void Reader::seekTo(const PropertyInfo &p)
     {
         if(p.index < m_dataOffsets.size())
         {
-            gzseek_raw(m_gzfile, m_dataOffsets[p.index]);
+            gzseek_raw((gzFile)m_gzfile, m_dataOffsets[p.index]);
         }
         else
         {
-            gzseek(m_gzfile, p.offset, SEEK_SET);
+            gzseek((gzFile)m_gzfile, p.offset, SEEK_SET);
         }
     }
 #endif
@@ -956,7 +956,7 @@ int Reader::tell()
 #ifdef GTO_SUPPORT_ZIP
     else
     {
-        return gztell(m_gzfile);
+        return gztell((gzFile)m_gzfile);
     }
 #else
     else
@@ -1259,9 +1259,9 @@ void Reader::readIndexTable()
     // Read the offset table
     //
     m_dataOffsets.resize(indexTableSize);
-    unsigned int restore_gz_pos = gztell(m_gzfile);
-    gzseek_raw(m_gzfile, indexTableOffset);
-    int r = gzread(m_gzfile, &m_dataOffsets.front(), 
+    unsigned int restore_gz_pos = gztell((gzFile)m_gzfile);
+    gzseek_raw((gzFile)m_gzfile, indexTableOffset);
+    int r = gzread((gzFile)m_gzfile, &m_dataOffsets.front(), 
                    indexTableSize * sizeof(unsigned int));
 
     //
@@ -1279,9 +1279,9 @@ void Reader::readIndexTable()
     // to 'normal' after a gzseek_raw, so I'm closing and re-
     // opening it.
     //
-    gzclose(m_gzfile);
+    gzclose((gzFile)m_gzfile);
     m_gzfile = gzopen(m_inName.c_str(), "rb");
-    gzseek(m_gzfile, restore_gz_pos, SEEK_SET);
+    gzseek((gzFile)m_gzfile, restore_gz_pos, SEEK_SET);
 }
 
 } // Gto
