@@ -41,6 +41,7 @@
 #include <algorithm>
 #include <iterator>
 #include <tiffio.h>
+#include <cstring>
 
 using namespace Gto;
 using namespace std;
